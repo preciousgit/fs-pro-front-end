@@ -1,0 +1,318 @@
+
+/* ========== Global layout ========== */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../assets/images/bg3.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+}
+
+/* ========== Navbar ========== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom:1px solid rgba(224, 224, 224, 0.5);
+    padding: 12px 20px;
+    /* background: rgba(255, 255, 255, 0.95); */
+}
+.brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: white;
+}
+
+/* nav links */
+.nav-links {
+    list-style: none;
+    display:flex;
+    gap: 18px;
+    padding-top: 10px;
+}
+.nav-links li a { 
+    color: white; 
+    text-decoration:none;
+    cursor: pointer; 
+    font-weight:500; 
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-btn {
+    font-size: 1.2rem;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: #0078ff;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.login-btn:hover, .profile-btn:hover {
+    color: #dce4ed;
+}
+
+.profile-btn {
+    font-size: 1.2rem;
+    padding: 8px;
+}
+
+/* cart button */
+.cart-btn { 
+    position:relative; 
+    background:white; 
+    color:#0078ff; 
+    border:none; 
+    padding:8px 14px; 
+    border-radius:6px; 
+    font-weight:600; 
+    cursor:pointer; 
+}
+
+.cart-btn:disabled { 
+    opacity:0.6; 
+    cursor:not-allowed; 
+}
+.cart-count { 
+    position:absolute; 
+    top:-6px; right:-6px; 
+    background:red; 
+    color:white; 
+    border-radius:50%; 
+    padding:2px 8px; 
+    font-size:12px; 
+}
+
+/* ========== Page body ========== */
+.content { 
+    position: relative;
+    display: flex;
+    flex: 1;
+    padding: 20px;
+}
+
+.content-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.47); 
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+
+/* main section */
+.main-section { 
+    flex:1; 
+}
+
+/* controls */
+.controls { 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    margin-bottom:16px; 
+    gap:12px; 
+}
+.search-bar { 
+    padding:8px 12px; 
+    border-radius:8px; 
+    border:1px solid #ccc; 
+    width:60%; 
+}
+.sort-controls { 
+    display:flex; 
+    gap:8px; 
+}
+.sort-select { 
+    padding:8px 10px; 
+    border-radius:6px; 
+}
+
+.sort-select .location{
+  color: red;
+}
+.sort-select .price{
+  color: orange;
+}
+.sort-select .spaces{
+  color: green;
+}
+
+/* product grid */
+.product-grid { 
+    display:grid; 
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); 
+    gap:16px; 
+}
+.product-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid #e6e6e6;
+  background: transparent;
+  transition: box-shadow 220ms ease, border-color 220ms ease, transform 220ms ease;
+  text-align: center;
+}
+
+
+/* image container */
+.image-wrap {
+  position: relative;
+  width: 100%;
+  height: 260px; /* adjust as needed */
+  overflow: hidden;
+  display: block;
+}
+
+/* lesson image inside product card */
+.lesson-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 200ms ease, filter 200ms ease;
+}
+
+/* overlay hidden by default, appears on hover */
+.card-overlay {
+  position: absolute;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.7) 100%);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none; /* prevents overlay blocking until visible */
+  z-index: 2;
+}
+
+/* show overlay and shrink image on hover */
+.product-card:hover .card-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* shrink image slightly to indicate active card */
+.product-card:hover .lesson-img {
+  transform: scale(0.95);
+  filter: brightness(0.95);
+}
+
+/* footer under the image (title + hint) */
+.card-footer {
+  padding: 10px 12px;
+  background: transparent;
+}
+.card-title {
+  font-size: 1rem;
+  margin: 0;
+  color: #111;
+}
+.card-sub {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* overlay text styles */
+.overlay-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.overlay-line {
+  margin: 0;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* overlay add-to-cart button (prominent) */
+.overlay-btn {
+  margin-top: 6px;
+  background: #2ecc71;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.overlay-btn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.card-overlay svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* small responsive tweak */
+@media (max-width: 520px) {
+  .image-wrap { height: 130px; }
+  .product-card { border-radius: 8px; }
+}
+
+
+.icon { 
+    font-size:28px; 
+    margin-bottom:6px; 
+}
+.product-card .location{
+  color: red;
+}
+.product-card .price{
+  color: orange;
+}
+.product-card .spaces{
+  color: green;
+}
+
+/* buttons */
+.btn-lesson { 
+    background:#0078ff; 
+    color:white; 
+    border:none; 
+    padding:8px 12px; 
+    border-radius:6px; 
+    cursor:pointer; 
+}
+button:disabled { 
+    background:#ccc; 
+    cursor:not-allowed; 
+}

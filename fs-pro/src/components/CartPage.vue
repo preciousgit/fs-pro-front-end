@@ -1,0 +1,119 @@
+<template>
+  <div class="cart-page">
+    <h2>Your Cart</h2>
+
+    <div v-if="cart.length === 0" class="empty-cart">Your cart is empty</div>
+
+    <ul v-else class="cart-items">
+      <li v-for="item in cart" :key="item.id" class="cart-item">
+        <div class="cart-item-info">
+          <strong>{{ item.topic }}</strong>
+          <div>£{{ item.price.toFixed(2) }} × {{ item.count }}</div>
+        </div>
+
+        <div class="item-actions">
+          <button @click="$emit('decrement', item)" class="btn-minus" > <font-awesome-icon :icon="['fas','minus']" /> </button>
+          <button @click="$emit('increment', item)" class="btn-plus" > <font-awesome-icon :icon="['fas','plus']" /> </button>
+          <button @click="$emit('remove', item)" class="btn-remove" > <font-awesome-icon :icon="['fas','trash']" /> </button>
+        </div>
+      </li>
+    </ul>
+
+    <div class="cart-summary" v-if="cart.length > 0">
+      <p><strong>Total:</strong> £{{ cartTotal.toFixed(2) }}</p>
+
+      <slot name="checkout">
+        <div class="checkout-default">
+          <div class="form-group">
+            <label>Full name</label>
+            <input 
+              v-model="localName" 
+              @input="validateCheckout" 
+              placeholder="Letters only"
+              :class="{ 'invalid': nameError && localName }"
+            />
+            <span class="error-message" v-if="nameError && localName">
+              Name must contain only letters
+            </span>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input 
+              v-model="localPhone" 
+              @input="validateCheckout" 
+              placeholder="Digits only"
+              :class="{ 'invalid': phoneError && localPhone }"
+            />
+            <span class="error-message" v-if="phoneError && localPhone">
+              Phone must contain only numbers
+            </span>
+          </div>
+
+          <button
+            class="checkout-btn"
+            :disabled="!isCheckoutFormValid"
+            @click="confirmCheckout"
+          >
+            Checkout
+          </button>
+        </div>
+      </slot>
+    </div>
+
+    <button class="back-btn" @click="$emit('back')"> <font-awesome-icon :icon="['fas','arrow-left']" /> Back to Lessons</button>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "CartPage",
+  props: {
+    cart: { type: Array, default: () => [] },
+    cartTotal: { type: Number, default: 0 },
+    customerName: { type: String, default: "" },
+    customerPhone: { type: String, default: "" },
+  },
+  emits: ["decrement", "increment", "remove", "confirm-checkout", "back", "validate", "update:customerName", "update:customerPhone"],
+  data() {
+    return { localName: this.customerName, 
+      localPhone: this.customerPhone,
+      nameError: false,
+      phoneError: false,
+      isCheckoutFormValid: false
+    };
+  },
+  watch: {
+    localName(v) { this.$emit("update:customerName", v); this.$emit("validate"); },
+    localPhone(v) { this.$emit("update:customerPhone", v); this.$emit("validate"); },
+    customerName(v) { this.localName = v; },
+    customerPhone(v) { this.localPhone = v; },
+  },
+  methods: {
+    validateCheckout() {
+      const namePattern = /^[A-Za-z\s]+$/;
+      const phonePattern = /^\d+$/;
+      
+      this.nameError = !namePattern.test(this.localName.trim());
+      this.phoneError = !phonePattern.test(this.localPhone.trim());
+      
+      this.isCheckoutFormValid = !this.nameError && !this.phoneError 
+        && this.localName.trim() !== "" 
+        && this.localPhone.trim() !== ""
+        && this.cart.length > 0;
+
+      // Emit values and validation state
+      this.$emit("update:customerName", this.localName);
+      this.$emit("update:customerPhone", this.localPhone);
+      this.$emit("validate");
+    },
+    confirmCheckout() {
+      if (!this.isCheckoutFormValid) return;
+      
+      alert(`Order Confirmed!\nCustomer: ${this.localName}\nPhone: ${this.localPhone}\nTotal: £${this.cartTotal.toFixed(2)}`);
+      this.$emit("confirm-checkout");
+    }
+  },
+};
+</script>
+
+<style src="../assets/style.css"></style>

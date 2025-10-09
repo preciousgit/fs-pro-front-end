@@ -316,3 +316,130 @@ button:disabled {
     background:#ccc; 
     cursor:not-allowed; 
 }
+/* Cart page and checkout buttons */
+
+.btn-remove {
+    color: red;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-plus, .btn-minus {
+    color: black;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.checkout-btn {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
+
+/* cart page */
+.cart-page { 
+    background:#fff; 
+    padding:16px; 
+    border-radius:8px; 
+    border:1px solid #e6e6e6; 
+}
+.cart-items { 
+    list-style:none; 
+    padding:0; 
+    margin:0 0 12px 0; 
+}
+.cart-item { 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    padding:10px; 
+    border-bottom:1px solid #f0f0f0; 
+}
+.item-actions { 
+    display:flex; gap:6px; 
+    align-items:center; 
+}
+.item-actions button { 
+    padding:6px 8px; }
+
+.item-actions svg { 
+  width:16px; height:16px;
+}
+
+/* checkout form */
+.checkout-default { 
+    margin-top:12px; 
+    display:flex; 
+    flex-direction:column; 
+    gap:8px; max-width:360px; 
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+}
+
+.form-group input.invalid {
+  border-color: #e74c3c;
+}
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+}
+
+/* back and checkout buttons */
+.checkout-btn {
+  width: 100px;
+  padding: 0.75rem;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.checkout-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.back-btn { 
+    margin-top:12px; 
+    background:#0069e0; 
+    color:white; 
+    padding:8px 12px; 
+    border-radius:6px; 
+    border:none; 
+    cursor:pointer;
+}
+
+
+/* footer */
+.footer { 
+    background:#0078ff; 
+    color:white; 
+    text-align:center; 
+    padding:12px 0; 
+    margin-top:20px; 
+}

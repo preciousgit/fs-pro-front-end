@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <div class="controls">
       <input v-model="searchLocal" class="search-bar" placeholder="Search lessons..." />
@@ -19,7 +19,7 @@
 
     <div class="product-grid">
       <LessonCard
-        v-for="lesson in lessons"
+        v-for="lesson in sortedLessons"
         :key="lesson.id"
         :lesson="lesson"
         @add-to-cart="$emit('add-to-cart', $event)"
@@ -56,6 +56,29 @@ export default {
     sortAttribute(v) { this.sortAttributeLocal = v; },
     sortOrder(v) { this.sortOrderLocal = v; },
   },
+  computed: {
+    sortedLessons() {
+      let filtered = this.lessons.filter(lesson =>
+        lesson.topic.toLowerCase().includes(this.searchLocal.toLowerCase()) ||
+        lesson.location.toLowerCase().includes(this.searchLocal.toLowerCase())
+      );
+
+      if (!this.sortAttributeLocal) return filtered;
+
+      return filtered.slice().sort((a, b) => {
+        let valA = a[this.sortAttributeLocal];
+        let valB = b[this.sortAttributeLocal];
+
+        // handle strings
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+
+        if (valA < valB) return this.sortOrderLocal === "asc" ? -1 : 1;
+        if (valA > valB) return this.sortOrderLocal === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+  }
 };
 </script>
 

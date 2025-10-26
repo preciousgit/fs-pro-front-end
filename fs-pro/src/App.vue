@@ -4,6 +4,7 @@
       :cart-count="cartItemCount"
       @toggle-cart="toggleCart"
       @show-login="showLogin = true"
+      @go-home="goToIndex" 
     />
 
     <div class="content">
@@ -63,19 +64,19 @@ export default {
       showCart: false,
 
       // background image used across whole app (navbar + body)
-      backgroundImage: require("./assets/images/bg1.jpg"),
+      backgroundImage: require("./assets/images/bg3.jpg"),
 
       lessons: [
         { id: 1, topic: "Mathematics", location: "Hendon", price: 100, spaces: 5, img: require('./assets/images/mths1.jpg'), category: "Math" },
-        { id: 2, topic: "Science Lab", location: "Colindale", price: 95, spaces: 5, img: require('./assets/images/sci-lab1.jpg'), category: "Science" },
-        { id: 3, topic: "Music", location: "Brent Cross", price: 80, spaces: 5, img: require('./assets/images/music1.jpg'), category: "Music" },
+        { id: 2, topic: "Science Lab", location: "Colindale", price: 95, spaces: 5, img: require('./assets/images/sci-lab2.jpg'), category: "Science" },
+        { id: 3, topic: "Music", location: "Brent Cross", price: 80, spaces: 5, img: require('./assets/images/music3.jpg'), category: "Music" },
         { id: 4, topic: "Programming", location: "Online", price: 120, spaces: 5, img: require('./assets/images/pgm1.jpg'), category: "Coding" },
         { id: 5, topic: "Art & Design", location: "Golders Green", price: 70, spaces: 5, img: require('./assets/images/art-d.jpg'), category: "Arts" },
         { id: 6, topic: "Football", location: "Hendon", price: 50, spaces: 5, img: require('./assets/images/fball1.jpg'), category: "Sports" },
         { id: 7, topic: "English Literature", location: "Colindale", price: 85, spaces: 5, img: require('./assets/images/e-lit1.jpg'), category: "English" },
         { id: 8, topic: "Advanced Maths", location: "Brent Cross", price: 130, spaces: 5, img: require('./assets/images/adv-mths.jpg'), category: "Math" },
-        { id: 9, topic: "Drama Club", location: "Golders Green", price: 60, spaces: 5, img: require('./assets/images/drama3.jpg'), category: "Arts" },
-        { id: 10, topic: "Robotics and Tech", location: "Online", price: 140, spaces: 5, img: require('./assets/images/rob-tec2.jpg'), category: "Coding" },
+        { id: 9, topic: "Drama Club", location: "Golders Green", price: 60, spaces: 5, img: require('./assets/images/drama4.jpg'), category: "Arts" },
+        { id: 10, topic: "Robotics and Tech", location: "Online", price: 140, spaces: 5, img: require('./assets/images/rob-tec3.jpg'), category: "Coding" },
       ],
 
       cart: [],
@@ -125,6 +126,13 @@ export default {
     }
   },
   methods: {
+    goToIndex() {
+      this.searchQuery = "";
+      this.sortAttribute = "";
+      this.sortOrder = "asc";
+      this.selectedCategory = "All";
+      this.showCart = false;
+    },
     toggleCart() {
       this.showCart = !this.showCart;
       if (!this.showCart) {

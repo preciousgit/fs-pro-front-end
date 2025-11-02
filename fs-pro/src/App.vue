@@ -41,6 +41,7 @@
 
     <LoginPopup :show="showLogin" @close="showLogin = false" />
     <FooterSection />
+    <ChatBot />
   </div>
 </template>
 
@@ -50,10 +51,11 @@ import LessonList from "./components/LessonList.vue";
 import CartPage from "./components/CartPage.vue";
 import FooterSection from "./components/FooterSection.vue";
 import LoginPopup from "./components/LoginPopup.vue";
+import ChatBot from "./components/ChatBot.vue";
 
 export default {
   name: "App",
-  components: { Navbar, LessonList, CartPage, FooterSection, LoginPopup },
+  components: { Navbar, LessonList, CartPage, FooterSection, LoginPopup, ChatBot },
   data() {
     return {
       showLogin: false,

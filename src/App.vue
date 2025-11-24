@@ -53,6 +53,18 @@ import FooterSection from "./components/FooterSection.vue";
 import LoginPopup from "./components/LoginPopup.vue";
 import ChatBot from "./components/ChatBot.vue";
 
+import bg1Image from "./assets/images/bg3.jpg";
+import mths1Image from "./assets/images/mths1.jpg";
+import sciLab2Image from "./assets/images/sci-lab2.jpg";
+import music3Image from "./assets/images/music3.jpg";
+import pgm1Image from "./assets/images/pgm1.jpg";
+import artDImage from "./assets/images/art-d.jpg";
+import fball1Image from "./assets/images/fball1.jpg";
+import eLit1Image from "./assets/images/e-lit1.jpg";
+import advMthsImage from "./assets/images/adv-mths.jpg";
+import drama4Image from "./assets/images/drama4.jpg";
+import robTec3Image from "./assets/images/rob-tec3.jpg";
+
 export default {
   name: "App",
   components: { Navbar, LessonList, CartPage, FooterSection, LoginPopup, ChatBot },
@@ -66,19 +78,19 @@ export default {
       showCart: false,
 
       // background image used across whole app (navbar + body)
-      backgroundImage: require("./assets/images/bg3.jpg"),
+      backgroundImage: bg1Image,
 
       lessons: [
-        { id: 1, topic: "Mathematics", location: "Hendon", price: 100, spaces: 5, img: require('./assets/images/mths1.jpg'), category: "Math" },
-        { id: 2, topic: "Science Lab", location: "Colindale", price: 95, spaces: 5, img: require('./assets/images/sci-lab2.jpg'), category: "Science" },
-        { id: 3, topic: "Music", location: "Brent Cross", price: 80, spaces: 5, img: require('./assets/images/music3.jpg'), category: "Music" },
-        { id: 4, topic: "Programming", location: "Online", price: 120, spaces: 5, img: require('./assets/images/pgm1.jpg'), category: "Coding" },
-        { id: 5, topic: "Art & Design", location: "Golders Green", price: 70, spaces: 5, img: require('./assets/images/art-d.jpg'), category: "Arts" },
-        { id: 6, topic: "Football", location: "Hendon", price: 50, spaces: 5, img: require('./assets/images/fball1.jpg'), category: "Sports" },
-        { id: 7, topic: "English Literature", location: "Colindale", price: 85, spaces: 5, img: require('./assets/images/e-lit1.jpg'), category: "English" },
-        { id: 8, topic: "Advanced Maths", location: "Brent Cross", price: 130, spaces: 5, img: require('./assets/images/adv-mths.jpg'), category: "Math" },
-        { id: 9, topic: "Drama Club", location: "Golders Green", price: 60, spaces: 5, img: require('./assets/images/drama4.jpg'), category: "Arts" },
-        { id: 10, topic: "Robotics and Tech", location: "Online", price: 140, spaces: 5, img: require('./assets/images/rob-tec3.jpg'), category: "Coding" },
+        { id: 1, topic: "Mathematics", location: "Hendon", price: 100, spaces: 5, img: mths1Image, category: "Math" },
+        { id: 2, topic: "Science Lab", location: "Colindale", price: 95, spaces: 5, img: sciLab2Image, category: "Science" },
+        { id: 3, topic: "Music", location: "Brent Cross", price: 80, spaces: 5, img: music3Image, category: "Music" },
+        { id: 4, topic: "Programming", location: "Online", price: 120, spaces: 5, img: pgm1Image, category: "Coding" },
+        { id: 5, topic: "Art & Design", location: "Golders Green", price: 70, spaces: 5, img: artDImage, category: "Arts" },
+        { id: 6, topic: "Football", location: "Hendon", price: 50, spaces: 5, img: fball1Image, category: "Sports" },
+        { id: 7, topic: "English Literature", location: "Colindale", price: 85, spaces: 5, img: eLit1Image, category: "English" },
+        { id: 8, topic: "Advanced Maths", location: "Brent Cross", price: 130, spaces: 5, img: advMthsImage, category: "Math" },
+        { id: 9, topic: "Drama Club", location: "Golders Green", price: 60, spaces: 5, img: drama4Image, category: "Arts" },
+        { id: 10, topic: "Robotics and Tech", location: "Online", price: 140, spaces: 5, img: robTec3Image, category: "Coding" },
       ],
 
       cart: [],
@@ -123,7 +135,7 @@ export default {
     },
     appBackgroundStyle() {
       return {
-        background: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${this.backgroundImage}) center/cover fixed no-repeat`
+        background: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${this.backgroundImage}) center/cover no-repeat`
       };
     }
   },

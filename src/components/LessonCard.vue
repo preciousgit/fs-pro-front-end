@@ -1,7 +1,7 @@
 <template>
   <div class="product-card">
     <div class="image-wrap">
-      <img :src="lesson.img" :alt="lesson.topic" class="lesson-img" />
+      <img :src="lesson.img" :alt="lesson.topic" class="lesson-img" loading="lazy" />
       <div class="card-overlay" aria-hidden="true">
         <h4 class="overlay-title">{{ lesson.topic }}</h4>
         <p class="overlay-line">{{ lesson.location }}</p>

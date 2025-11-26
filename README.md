@@ -36,3 +36,14 @@ npm run dev
 ```sh
 npm run build
 ```
+
+### Deploy to Render
+
+# 1. In your frontend .env file:
+VUE_APP_API_URL=https://your-render-backend-url.onrender.com
+
+# 2. Build your frontend:
+npm run build
+
+# 3. Deploy the 'dist' folder to a static site host
+#    (e.g., Vercel, Netlify, or Render's static site)

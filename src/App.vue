@@ -46,28 +46,29 @@
 </template>
 
 <script>
+import { fetchLessons, createOrder, updateLessonSpaces } from './services/api';
 import Navbar from "./components/Navbar.vue";
 import LessonList from "./components/LessonList.vue";
 import CartPage from "./components/CartPage.vue";
 import FooterSection from "./components/FooterSection.vue";
 import LoginPopup from "./components/LoginPopup.vue";
-import ChatBot from "./components/ChatBot.vue";
 
-import bg1Image from "./assets/images/bg3.jpg";
-import mths1Image from "./assets/images/mths1.jpg";
-import sciLab2Image from "./assets/images/sci-lab2.jpg";
-import music3Image from "./assets/images/music3.jpg";
-import pgm1Image from "./assets/images/pgm1.jpg";
-import artDImage from "./assets/images/art-d.jpg";
-import fball1Image from "./assets/images/fball1.jpg";
-import eLit1Image from "./assets/images/e-lit1.jpg";
-import advMthsImage from "./assets/images/adv-mths.jpg";
-import drama4Image from "./assets/images/drama4.jpg";
-import robTec3Image from "./assets/images/rob-tec3.jpg";
+// import Imgs
+import bg1Image from "../../FS-Pro-BE/public/images/bg3.jpg";
+import mths1Image from "../../FS-Pro-BE/public/images/mths1.jpg";
+import sciLab2Image from "../../FS-Pro-BE/public/images/sci-lab2.jpg";
+import music3Image from "../../FS-Pro-BE/public/images/music3.jpg";
+import pgm1Image from "../../FS-Pro-BE/public/images/pgm1.jpg";
+import artDImage from "../../FS-Pro-BE/public/images/art-d.jpg";
+import fball1Image from "../../FS-Pro-BE/public/images/fball1.jpg";
+import eLit1Image from "../../FS-Pro-BE/public/images/e-lit1.jpg";
+import advMthsImage from "../../FS-Pro-BE/public/images/adv-mths.jpg";
+import drama4Image from "../../FS-Pro-BE/public/images/drama4.jpg";
+import robTec3Image from "../../FS-Pro-BE/public/images/rob-tec3.jpg";
 
 export default {
   name: "App",
-  components: { Navbar, LessonList, CartPage, FooterSection, LoginPopup, ChatBot },
+  components: { Navbar, LessonList, CartPage, FooterSection, LoginPopup },
   data() {
     return {
       showLogin: false,
@@ -77,21 +78,10 @@ export default {
       selectedCategory: "All",
       showCart: false,
 
-      // background image used across whole app (navbar + body)
+      // background image 
       backgroundImage: bg1Image,
 
-      lessons: [
-        { id: 1, topic: "Mathematics", location: "Hendon", price: 100, spaces: 5, img: mths1Image, category: "Math" },
-        { id: 2, topic: "Science Lab", location: "Colindale", price: 95, spaces: 5, img: sciLab2Image, category: "Science" },
-        { id: 3, topic: "Music", location: "Brent Cross", price: 80, spaces: 5, img: music3Image, category: "Music" },
-        { id: 4, topic: "Programming", location: "Online", price: 120, spaces: 5, img: pgm1Image, category: "Coding" },
-        { id: 5, topic: "Art & Design", location: "Golders Green", price: 70, spaces: 5, img: artDImage, category: "Arts" },
-        { id: 6, topic: "Football", location: "Hendon", price: 50, spaces: 5, img: fball1Image, category: "Sports" },
-        { id: 7, topic: "English Literature", location: "Colindale", price: 85, spaces: 5, img: eLit1Image, category: "English" },
-        { id: 8, topic: "Advanced Maths", location: "Brent Cross", price: 130, spaces: 5, img: advMthsImage, category: "Math" },
-        { id: 9, topic: "Drama Club", location: "Golders Green", price: 60, spaces: 5, img: drama4Image, category: "Arts" },
-        { id: 10, topic: "Robotics and Tech", location: "Online", price: 140, spaces: 5, img: robTec3Image, category: "Coding" },
-      ],
+      lessons: [],
 
       cart: [],
       customerName: "",
@@ -101,6 +91,13 @@ export default {
       isCheckoutFormValid: false,
     };
   },
+
+  async created() {
+    await this.fetchLessons();
+  },
+
+
+
   computed: {
     cartItemCount() {
       return this.cart.reduce((sum, it) => sum + it.count, 0);
@@ -116,6 +113,7 @@ export default {
         const inLocation = p.location.toLowerCase().includes(q);
         const inPrice = String(p.price).includes(q);
         const inSpaces = String(p.spaces).includes(q);
+
         const matchSearch = q === "" || inTopic || inLocation || inPrice || inSpaces;
         return matchCategory && matchSearch;
       });
@@ -140,6 +138,15 @@ export default {
     }
   },
   methods: {
+
+    async fetchLessons() {
+      try {
+        const response = await fetchLessons();
+        this.lessons = response;
+      } catch (error) {
+        console.error("Error fetching lessons:", error);
+      }
+    },
     goToIndex() {
       this.searchQuery = "";
       this.sortAttribute = "";
@@ -157,6 +164,7 @@ export default {
         this.isCheckoutFormValid = false;
       }
     },
+    // cart methods
     getLessonById(id) {
       return this.lessons.find((p) => p.id === id);
     },
@@ -189,6 +197,7 @@ export default {
       if (lesson) lesson.spaces += this.cart[idx].count;
       this.cart.splice(idx, 1);
     },
+    // checkout methods
     validateCheckout() {
       const namePattern = /^[A-Za-z\s]+$/;
       this.isNameValid = namePattern.test(this.customerName.trim());
@@ -196,18 +205,40 @@ export default {
       this.isPhoneValid = phonePattern.test(this.customerPhone.trim());
       this.isCheckoutFormValid = this.isNameValid && this.isPhoneValid && this.cart.length > 0;
     },
-    confirmCheckout(payload) {
-      // payload optional; keep current behaviour
+
+    async confirmCheckout() {
       this.validateCheckout();
       if (!this.isCheckoutFormValid) return;
-      alert(`Thank you ${this.customerName}! Your order of £${this.cartTotal.toFixed(2)} has been submitted.`);
-      this.cart = [];
-      this.customerName = "";
-      this.customerPhone = "";
-      this.isNameValid = false;
-      this.isPhoneValid = false;
-      this.isCheckoutFormValid = false;
-      this.showCart = false;
+
+      try {
+
+        const orderData = {
+          name: this.customerName,
+          phone: this.customerPhone,
+          lessonIDs: this.cart.map((item) => item.id),
+          numberOfSpace: this.cart.reduce((sum, item) => sum + item.quantity, 0),
+        };
+
+        await createOrder(orderData);
+
+        const updates = this.cart.map((item) =>
+          updateLessonSpaces(item.id, item.lesson.space)
+        );
+
+        await Promise.all(updates);
+
+        this.cart = [];
+        this.customerName = "";
+        this.customerPhone = "";
+        this.showCart = false;
+
+        await this.loadLessons();
+
+        alert("Order placed successfully!");
+      } catch (error) {
+        console.error("Checkout failed:", error);
+        alert("Failed to place order. Please try again.");
+      }
     },
   },
 };

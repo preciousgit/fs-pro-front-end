@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.VUE_APP_API_URL || 'https://fs-pro-back-end.onrender.com';
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || 'https://fs-pro-back-end.onrender.com';
 
 export const fetchLessons = async () => {
     try {

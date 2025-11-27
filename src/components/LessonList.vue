@@ -58,23 +58,42 @@ export default {
   },
   computed: {
     sortedLessons() {
-      let filtered = this.lessons.filter(lesson =>
-        lesson.topic.toLowerCase().includes(this.searchLocal.toLowerCase()) ||
-        lesson.location.toLowerCase().includes(this.searchLocal.toLowerCase())
-      );
+      const q = (this.searchLocal || "").toLowerCase();
+      const getField = (lesson, field) => {
+        if (field === 'topic') return (lesson.topic || lesson.title || '').toString();
+        if (field === 'location') return (lesson.location || '').toString();
+        if (field === 'price') return String(lesson.price ?? '');
+        if (field === 'spaces') return String(lesson.spaces ?? lesson.space ?? '');
+        return String(lesson[field] ?? '');
+      };
+
+      let filtered = this.lessons.filter(lesson => {
+        const topic = getField(lesson, 'topic').toLowerCase();
+        const location = getField(lesson, 'location').toLowerCase();
+        return topic.includes(q) || location.includes(q) || (String(lesson.price ?? '').includes(q)) || (String(lesson.spaces ?? lesson.space ?? '').includes(q));
+      });
 
       if (!this.sortAttributeLocal) return filtered;
 
       return filtered.slice().sort((a, b) => {
-        let valA = a[this.sortAttributeLocal];
-        let valB = b[this.sortAttributeLocal];
+        const attr = this.sortAttributeLocal;
+        let valA = getField(a, attr);
+        let valB = getField(b, attr);
 
-        // handle strings
-        if (typeof valA === "string") valA = valA.toLowerCase();
-        if (typeof valB === "string") valB = valB.toLowerCase();
+        // numeric sort for price/spaces
+        if (attr === 'price' || attr === 'spaces') {
+          const na = Number(valA) || 0;
+          const nb = Number(valB) || 0;
+          if (na < nb) return this.sortOrderLocal === 'asc' ? -1 : 1;
+          if (na > nb) return this.sortOrderLocal === 'asc' ? 1 : -1;
+          return 0;
+        }
 
-        if (valA < valB) return this.sortOrderLocal === "asc" ? -1 : 1;
-        if (valA > valB) return this.sortOrderLocal === "asc" ? 1 : -1;
+        // string comparison
+        valA = (valA || '').toLowerCase();
+        valB = (valB || '').toLowerCase();
+        if (valA < valB) return this.sortOrderLocal === 'asc' ? -1 : 1;
+        if (valA > valB) return this.sortOrderLocal === 'asc' ? 1 : -1;
         return 0;
       });
     }

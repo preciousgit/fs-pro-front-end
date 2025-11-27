@@ -194,7 +194,7 @@ export default {
       if (available <= 0) return;
       const existing = this.cart.find((c) => String(c.id) === String(lessonId));
       if (existing) existing.count += 1;
-      else this.cart.push({ id: String(lessonId), title: lesson.title || lesson.topic || '', price: lesson.price, count: 1 });
+      else this.cart.push({ id: String(lessonId), title: lesson.title || lesson.topic || '', price: lesson.price, img: lesson.img || '', count: 1 });
     },
     decrementCartItem(cartItem) {
       const idx = this.cart.findIndex((c) => String(c.id) === String(cartItem.id));

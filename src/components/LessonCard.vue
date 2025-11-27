@@ -58,7 +58,7 @@ export default {
       if (!img) return null;
       // If image is already an absolute URL, return it.
       if (/^https?:\/\//i.test(img)) return img;
-      // Ensure no leading slash duplication
+      // Otherwise, construct from API_BASE_URL + img path (which already includes /images/)
       const trimmed = img.replace(/^\//, '');
       return `${API_BASE_URL}/${trimmed}`;
     }

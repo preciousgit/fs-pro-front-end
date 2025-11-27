@@ -6,6 +6,10 @@
 
     <ul v-else class="cart-items">
       <li v-for="item in cart" :key="item.id" class="cart-item">
+        <div class="cart-item-image">
+          <img :src="getImageUrl(item)" :alt="item.title" class="item-image" />
+        </div>
+
         <div class="cart-item-info">
           <strong>{{ item.title }}</strong>
           <div>£{{ item.price.toFixed(2) }} × {{ item.count }}</div>
@@ -76,6 +80,8 @@
 </template>
 
 <script>
+import { API_BASE_URL } from '../services/api.js';
+
 export default {
   name: "CartPage",
   props: {
@@ -120,7 +126,22 @@ export default {
     },
   },
   methods: {
-    validateCheckout() {
+    getImageUrl(item) {
+      const img = item.img || '';
+      if (!img) return null;
+      console.log('CartPage - Item img:', img, 'API_BASE_URL:', API_BASE_URL);
+      // If it's already a full URL, return as-is
+      if (/^https?:/.test(img)) {
+        return img;
+      }
+      //  construct from API_BASE_URL + img path for relative paths     
+      const trimmed = img.replace(/^\//, '');
+      const url = `${API_BASE_URL}/${trimmed}`;
+      console.log('Constructed URL:', url);
+      return url;
+    },
+
+    validateCheckout() {      
       const namePattern = /^[A-Za-z\s]+$/;
       const phonePattern = /^\d+$/;
 
@@ -153,3 +174,4 @@ export default {
 </script>
 
 <style src="../assets/style.css"></style>
+

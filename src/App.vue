@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { fetchLessons, createOrder, updateLessonSpaces } from './services/api';
+import { fetchLessons, createOrder, updateLessonSpaces } from './services/api.js';
 import Navbar from "./components/Navbar.vue";
 import LessonList from "./components/LessonList.vue";
 import CartPage from "./components/CartPage.vue";
@@ -53,17 +53,17 @@ import FooterSection from "./components/FooterSection.vue";
 import LoginPopup from "./components/LoginPopup.vue";
 
 // import Imgs
-import bg1Image from "../../FS-Pro-BE/public/images/bg3.jpg";
-import mths1Image from "../../FS-Pro-BE/public/images/mths1.jpg";
-import sciLab2Image from "../../FS-Pro-BE/public/images/sci-lab2.jpg";
-import music3Image from "../../FS-Pro-BE/public/images/music3.jpg";
-import pgm1Image from "../../FS-Pro-BE/public/images/pgm1.jpg";
-import artDImage from "../../FS-Pro-BE/public/images/art-d.jpg";
-import fball1Image from "../../FS-Pro-BE/public/images/fball1.jpg";
-import eLit1Image from "../../FS-Pro-BE/public/images/e-lit1.jpg";
-import advMthsImage from "../../FS-Pro-BE/public/images/adv-mths.jpg";
-import drama4Image from "../../FS-Pro-BE/public/images/drama4.jpg";
-import robTec3Image from "../../FS-Pro-BE/public/images/rob-tec3.jpg";
+import bg1Image from "../src/assets/images/bg3.jpg";
+import mths1Image from "../src/assets/images/mths1.jpg";
+import sciLab2Image from "../src/assets/images/sci-lab2.jpg";
+import music3Image from "../src/assets/images/music3.jpg";
+import pgm1Image from "../src/assets/images/pgm1.jpg";
+import artDImage from "../src/assets/images/art-d.jpg";
+import fball1Image from "../src/assets/images/fball1.jpg";
+import eLit1Image from "../src/assets/images/e-lit1.jpg";
+import advMthsImage from "../src/assets/images/adv-mths.jpg";
+import drama4Image from "../src/assets/images/drama4.jpg";
+import robTec3Image from "../src/assets/images/rob-tec3.jpg";
 
 export default {
   name: "App",
@@ -168,24 +168,29 @@ export default {
       return this.lessons.find((p) => p.id === id);
     },
     addToCart(lesson) {
-      if (lesson.spaces <= 0) return;
-      lesson.spaces--;
+      const available = lesson.spaces ?? lesson.space ?? 0;
+      if (available <= 0) return;
+      if (lesson.spaces != null) lesson.spaces = available - 1; else lesson.space = available - 1;
       const existing = this.cart.find((c) => c.id === lesson.id);
       if (existing) existing.count++;
-      else this.cart.push({ id: lesson.id, topic: lesson.topic, price: lesson.price, count: 1 });
+      else this.cart.push({ id: lesson.id, title: lesson.title || lesson.topic || '', price: lesson.price, count: 1 });
     },
     decrementCartItem(cartItem) {
       const idx = this.cart.findIndex((c) => c.id === cartItem.id);
       if (idx === -1) return;
       this.cart[idx].count--;
       const lesson = this.getLessonById(cartItem.id);
-      if (lesson) lesson.spaces++;
+      if (lesson) {
+        if (lesson.spaces != null) lesson.spaces++;
+        else if (lesson.space != null) lesson.space++;
+      }
       if (this.cart[idx].count <= 0) this.cart.splice(idx, 1);
     },
     incrementCartItem(cartItem) {
       const lesson = this.getLessonById(cartItem.id);
-      if (!lesson || lesson.spaces <= 0) return;
-      lesson.spaces--;
+      const available = (lesson && (lesson.spaces ?? lesson.space)) ?? 0;
+      if (!lesson || available <= 0) return;
+      if (lesson.spaces != null) lesson.spaces = available - 1; else lesson.space = available - 1;
       const c = this.cart.find((x) => x.id === cartItem.id);
       if (c) c.count++;
     },
@@ -193,7 +198,10 @@ export default {
       const idx = this.cart.findIndex((c) => c.id === cartItem.id);
       if (idx === -1) return;
       const lesson = this.getLessonById(cartItem.id);
-      if (lesson) lesson.spaces += this.cart[idx].count;
+      if (lesson) {
+        if (lesson.spaces != null) lesson.spaces += this.cart[idx].count;
+        else if (lesson.space != null) lesson.space += this.cart[idx].count;
+      }
       this.cart.splice(idx, 1);
     },
     // checkout methods
@@ -220,9 +228,11 @@ export default {
 
         await createOrder(orderData);
 
-        const updates = this.cart.map((item) =>
-          updateLessonSpaces(item.id, item.lesson.space)
-        );
+      const updates = this.cart.map((item) => {
+        const lesson = this.getLessonById(item.id);
+        return updateLessonSpaces(item.id, lesson.spaces);
+      });
+
 
         await Promise.all(updates);
 
@@ -231,7 +241,7 @@ export default {
         this.customerPhone = "";
         this.showCart = false;
 
-        await this.loadLessons();
+        await this.fetchLessons();
 
         alert("Order placed successfully!");
       } catch (error) {

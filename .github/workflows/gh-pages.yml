@@ -25,6 +25,9 @@ jobs:
           npm ci
           npm run build
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
       - name: Upload built site for Pages
         uses: actions/upload-pages-artifact@v1
         with:

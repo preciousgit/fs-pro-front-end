@@ -216,7 +216,7 @@ export default {
           name: this.customerName,
           phone: this.customerPhone,
           lessonIDs: this.cart.map((item) => item.id),
-          numberOfSpace: this.cart.reduce((sum, item) => sum + item.quantity, 0),
+          numberOfSpace: this.cart.reduce((sum, item) => sum + item.count, 0),
         };
 
         await createOrder(orderData);

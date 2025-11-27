@@ -41,7 +41,6 @@
 
     <LoginPopup :show="showLogin" @close="showLogin = false" />
     <FooterSection />
-    <ChatBot />
   </div>
 </template>
 
@@ -109,7 +108,7 @@ export default {
       const q = this.searchQuery.trim().toLowerCase();
       let list = this.lessons.filter((p) => {
         const matchCategory = this.selectedCategory === "All" || p.category === this.selectedCategory;
-        const inTopic = p.topic.toLowerCase().includes(q);
+        const inTopic = (p.title || "").toLowerCase().includes(q);
         const inLocation = p.location.toLowerCase().includes(q);
         const inPrice = String(p.price).includes(q);
         const inSpaces = String(p.spaces).includes(q);

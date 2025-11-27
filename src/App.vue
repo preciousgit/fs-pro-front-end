@@ -106,21 +106,36 @@ export default {
     },
     filteredAndSortedLessons() {
       const q = this.searchQuery.trim().toLowerCase();
-      let list = this.lessons.filter((p) => {
-        const matchCategory = this.selectedCategory === "All" || p.category === this.selectedCategory;
-        const inTopic = (p.title || "").toLowerCase().includes(q);
-        const inLocation = p.location.toLowerCase().includes(q);
-        const inPrice = String(p.price).includes(q);
-        const inSpaces = String(p.spaces).includes(q);
+      // Build a derived list that does not mutate original lesson objects.
+      // Each item will include `availableSpaces` = original spaces - reserved in cart.
+      const list = this.lessons
+        .map((p) => {
+          const baseSpaces = Number(p.spaces ?? p.space ?? 0) || 0;
+          const pid = p.id ?? p._id ?? (p._id?._id ?? p._id?.$oid);
+          const reserved = (this.cart.find((c) => String(c.id) === String(pid))?.count) ?? 0;
+          const availableSpaces = Math.max(0, baseSpaces - reserved);
+          return Object.assign({}, p, { availableSpaces });
+        })
+        .filter((p) => {
+          const matchCategory = this.selectedCategory === "All" || p.category === this.selectedCategory;
+          const inTopic = (p.title || p.topic || "").toLowerCase().includes(q);
+          const inLocation = (p.location || "").toLowerCase().includes(q);
+          const inPrice = String(p.price ?? "").includes(q);
+          const inSpaces = String(p.availableSpaces ?? p.spaces ?? p.space ?? "").includes(q);
 
-        const matchSearch = q === "" || inTopic || inLocation || inPrice || inSpaces;
-        return matchCategory && matchSearch;
-      });
+          const matchSearch = q === "" || inTopic || inLocation || inPrice || inSpaces;
+          return matchCategory && matchSearch;
+        });
 
       if (this.sortAttribute) {
         list.sort((a, b) => {
           let av = a[this.sortAttribute];
           let bv = b[this.sortAttribute];
+          // When sorting by spaces, prefer availableSpaces if present
+          if (this.sortAttribute === 'spaces') {
+            av = a.availableSpaces ?? a.spaces ?? a.space;
+            bv = b.availableSpaces ?? b.spaces ?? b.space;
+          }
           if (typeof av === "string") av = av.toLowerCase();
           if (typeof bv === "string") bv = bv.toLowerCase();
           if (av < bv) return this.sortOrder === "asc" ? -1 : 1;
@@ -165,43 +180,41 @@ export default {
     },
     // cart methods
     getLessonById(id) {
-      return this.lessons.find((p) => p.id === id);
+      const sid = id == null ? id : String(id);
+      return this.lessons.find((p) => {
+        const pid = p.id ?? p._id ?? p._id?._id ?? p._id?.$oid;
+        return pid != null && String(pid) === sid;
+      });
     },
     addToCart(lesson) {
-      const available = lesson.spaces ?? lesson.space ?? 0;
+      const lessonId = lesson.id ?? lesson._id ?? (lesson._id?._id ?? lesson._id?.$oid);
+      const base = Number(lesson.spaces ?? lesson.space ?? 0) || 0;
+      const reserved = (this.cart.find((c) => String(c.id) === String(lessonId))?.count) ?? 0;
+      const available = Math.max(0, base - reserved);
       if (available <= 0) return;
-      if (lesson.spaces != null) lesson.spaces = available - 1; else lesson.space = available - 1;
-      const existing = this.cart.find((c) => c.id === lesson.id);
-      if (existing) existing.count++;
-      else this.cart.push({ id: lesson.id, title: lesson.title || lesson.topic || '', price: lesson.price, count: 1 });
+      const existing = this.cart.find((c) => String(c.id) === String(lessonId));
+      if (existing) existing.count += 1;
+      else this.cart.push({ id: String(lessonId), title: lesson.title || lesson.topic || '', price: lesson.price, count: 1 });
     },
     decrementCartItem(cartItem) {
-      const idx = this.cart.findIndex((c) => c.id === cartItem.id);
+      const idx = this.cart.findIndex((c) => String(c.id) === String(cartItem.id));
       if (idx === -1) return;
       this.cart[idx].count--;
-      const lesson = this.getLessonById(cartItem.id);
-      if (lesson) {
-        if (lesson.spaces != null) lesson.spaces++;
-        else if (lesson.space != null) lesson.space++;
-      }
       if (this.cart[idx].count <= 0) this.cart.splice(idx, 1);
     },
     incrementCartItem(cartItem) {
       const lesson = this.getLessonById(cartItem.id);
-      const available = (lesson && (lesson.spaces ?? lesson.space)) ?? 0;
-      if (!lesson || available <= 0) return;
-      if (lesson.spaces != null) lesson.spaces = available - 1; else lesson.space = available - 1;
-      const c = this.cart.find((x) => x.id === cartItem.id);
+      if (!lesson) return;
+      const base = Number(lesson.spaces ?? lesson.space ?? 0) || 0;
+      const reserved = (this.cart.find((c) => String(c.id) === String(lesson.id ?? lesson._id))?.count) ?? 0;
+      const available = Math.max(0, base - reserved);
+      if (available <= 0) return;
+      const c = this.cart.find((x) => String(x.id) === String(cartItem.id));
       if (c) c.count++;
     },
     removeCartItem(cartItem) {
-      const idx = this.cart.findIndex((c) => c.id === cartItem.id);
+      const idx = this.cart.findIndex((c) => String(c.id) === String(cartItem.id));
       if (idx === -1) return;
-      const lesson = this.getLessonById(cartItem.id);
-      if (lesson) {
-        if (lesson.spaces != null) lesson.spaces += this.cart[idx].count;
-        else if (lesson.space != null) lesson.space += this.cart[idx].count;
-      }
       this.cart.splice(idx, 1);
     },
     // checkout methods
@@ -230,7 +243,9 @@ export default {
 
       const updates = this.cart.map((item) => {
         const lesson = this.getLessonById(item.id);
-        return updateLessonSpaces(item.id, lesson.spaces);
+        const current = Number(lesson?.spaces ?? lesson?.space ?? 0) || 0;
+        const newSpaces = Math.max(0, current - item.count);
+        return updateLessonSpaces(item.id, newSpaces);
       });
 
 

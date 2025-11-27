@@ -356,10 +356,12 @@ button:disabled {
 
 /* cart page */
 .cart-page { 
-    background:#fff; 
+    background:#ffffff3d; 
     padding:16px; 
     border-radius:8px; 
-    border:1px solid #e6e6e6; 
+    border:1px solid #e6e6e6;
+    max-width:1200px;
+    margin: 0 auto;
 }
 .cart-items { 
     list-style:none; 

@@ -20,7 +20,7 @@
     <div class="product-grid">
       <LessonCard
         v-for="lesson in sortedLessons"
-        :key="lesson.id"
+        :key="lesson.id ?? lesson._id"
         :lesson="lesson"
         @add-to-cart="$emit('add-to-cart', $event)"
       />
@@ -63,14 +63,15 @@ export default {
         if (field === 'topic') return (lesson.topic || lesson.title || '').toString();
         if (field === 'location') return (lesson.location || '').toString();
         if (field === 'price') return String(lesson.price ?? '');
-        if (field === 'spaces') return String(lesson.spaces ?? lesson.space ?? '');
+        if (field === 'spaces') return String(lesson.availableSpaces ?? lesson.spaces ?? lesson.space ?? '');
         return String(lesson[field] ?? '');
       };
 
       let filtered = this.lessons.filter(lesson => {
         const topic = getField(lesson, 'topic').toLowerCase();
         const location = getField(lesson, 'location').toLowerCase();
-        return topic.includes(q) || location.includes(q) || (String(lesson.price ?? '').includes(q)) || (String(lesson.spaces ?? lesson.space ?? '').includes(q));
+        const spacesStr = String(lesson.availableSpaces ?? lesson.spaces ?? lesson.space ?? '');
+        return topic.includes(q) || location.includes(q) || (String(lesson.price ?? '').includes(q)) || spacesStr.includes(q);
       });
 
       if (!this.sortAttributeLocal) return filtered;

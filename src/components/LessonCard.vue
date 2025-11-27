@@ -1,28 +1,36 @@
 <template>
   <div class="product-card">
     <div class="image-wrap">
-      <!-- If lesson.img exists use it, otherwise show placeholder -->
-      <!-- <img 
-        :src="lesson.img || 'https://via.placeholder.com/300x200?text=Lesson+Image'" 
-        :alt="lesson.title" 
-        class="lesson-img" 
-        loading="lazy" 
-      /> -->
+      <!-- If lesson.img exists use it (from backend), otherwise show placeholder -->
+      <img
+        v-if="imageUrl"
+        :src="imageUrl"
+        :alt="lesson.title || lesson.topic || 'Lesson image'"
+        class="lesson-img"
+        loading="lazy"
+      />
+      <img
+        v-else
+        src="https://via.placeholder.com/300x200?text=Lesson+Image"
+        alt="placeholder"
+        class="lesson-img"
+        loading="lazy"
+      />
 
       <div class="card-overlay" aria-hidden="true">
-        <h4 class="overlay-title">{{ lesson.title }}</h4>
-        <p class="overlay-line">{{ lesson.location }}</p>
-        <p class="overlay-line">£{{ lesson.price?.toFixed(2) }}</p>
+        <h4 class="overlay-title">{{ lesson.title || lesson.topic }}</h4>
+        <p class="overlay-line">{{ lesson.location || '' }}</p>
+        <p class="overlay-line">£{{ (lesson.price ?? 0).toFixed(2) }}</p>
 
-        <!-- Updated to match backend field: lesson.space -->
-        <p class="overlay-line">Spaces left: {{ lesson.space }}</p>
+        <!-- Prefer derived availableSpaces if present, otherwise fallback to spaces/space -->
+        <p class="overlay-line">Spaces left: {{ lesson.availableSpaces ?? lesson.spaces ?? lesson.space ?? 0 }}</p>
 
         <button 
           class="overlay-btn" 
-          :disabled="lesson.space === 0" 
+          :disabled="(lesson.availableSpaces ?? lesson.spaces ?? lesson.space ?? 0) === 0" 
           @click="$emit('add-to-cart', lesson)"
         >
-          {{ lesson.space === 0 ? 'No Space' : 'Add to Cart' }}
+          {{ (lesson.availableSpaces ?? lesson.spaces ?? lesson.space ?? 0) === 0 ? 'No Space' : 'Add to Cart' }}
         </button>
       </div>
     </div>
@@ -35,6 +43,7 @@
 </template>
 
 <script>
+import { API_BASE_URL } from '../services/api.js';
 export default {
   name: "LessonCard",
   props: {
@@ -43,6 +52,17 @@ export default {
       required: true,
     },
   },
+  computed: {
+    imageUrl() {
+      const img = this.lesson?.img || this.lesson?.image || this.lesson?.imgUrl;
+      if (!img) return null;
+      // If image is already an absolute URL, return it.
+      if (/^https?:\/\//i.test(img)) return img;
+      // Ensure no leading slash duplication
+      const trimmed = img.replace(/^\//, '');
+      return `${API_BASE_URL}/${trimmed}`;
+    }
+  }
 };
 </script>
 

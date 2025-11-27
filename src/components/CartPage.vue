@@ -5,7 +5,7 @@
     <div v-if="cart.length === 0" class="empty-cart">Your cart is empty</div>
 
     <ul v-else class="cart-items">
-      <li v-for="item in cart" :key="item._id" class="cart-item">
+      <li v-for="item in cart" :key="item.id" class="cart-item">
         <div class="cart-item-info">
           <strong>{{ item.title }}</strong>
           <div>£{{ item.price.toFixed(2) }} × {{ item.count }}</div>

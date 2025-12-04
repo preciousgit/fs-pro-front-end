@@ -1,46 +1,80 @@
 <template>
   <div class="app-container" :style="appBackgroundStyle">
-    <Navbar
-      :cart-count="cartItemCount"
-      @toggle-cart="toggleCart"
-      @show-login="showLogin = true"
-      @go-home="goToIndex" 
-    />
-
-    <div class="content">
-      <div class="content-inner">
-        <main class="main-section">
-          <LessonList
-            v-if="!showCart"
-            :lessons="filteredAndSortedLessons"
-            @add-to-cart="addToCart"
-            :search.sync="searchQuery"
-            :sort-attribute.sync="sortAttribute"
-            :sort-order.sync="sortOrder"
-          />
-
-          <CartPage
-            v-else
-            :cart="cart"
-            :cart-total="cartTotal"
-            @decrement="decrementCartItem"
-            @increment="incrementCartItem"
-            @remove="removeCartItem"
-            @confirm-checkout="confirmCheckout"
-            @back="toggleCart"
-            :customer-name.sync="customerName"
-            :customer-phone.sync="customerPhone"
-            :is-name-valid="isNameValid"
-            :is-phone-valid="isPhoneValid"
-            :is-valid="isCheckoutFormValid"
-            @validate="validateCheckout"
-          />
-        </main>
+    <!-- Order Confirmation Popup -->
+    <div v-if="showOrderConfirmation" class="confirmation-overlay" @click.self="closeConfirmation">
+      <div class="confirmation-popup">
+        <div class="confirmation-icon">
+          <font-awesome-icon :icon="['fas', 'check-circle']" />
+        </div>
+        <h3>Order Confirmed!</h3>
+        <p>Your order has been placed successfully.</p>
+        <p>Thank you for your purchase!</p>
+        <button @click="closeConfirmation" class="confirmation-close-btn">Close</button>
       </div>
     </div>
+    
+    <!-- Show login form by default if not authenticated -->
+    <div v-if="!isAuthenticated" class="auth-container" style="width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center;">
+      <LoginPopup 
+        :show="true" 
+        @close="closeAuth"
+        @login="handleLogin"
+        @switch-to-register="() => { showRegister = true; }"
+      />
+      <RegisterPopup
+        :show="showRegister"
+        @close="closeAuth"
+        @registered="handleRegistration"
+        @switch-to-login="() => { showRegister = false; }"
+      />
+    </div>
 
-    <LoginPopup :show="showLogin" @close="showLogin = false" />
-    <FooterSection />
+    <!-- Main app content (only shown when authenticated) -->
+    <div v-else class="app-content">
+      <div class="main-wrapper">
+        <Navbar
+          :cart-count="cartItemCount"
+          :is-authenticated="isAuthenticated"
+          :current-user="currentUser"
+          @toggle-cart="toggleCart"
+          @logout="handleLogout"
+          @go-home="goToIndex" 
+        />
+
+        <div class="content">
+          <div class="content-inner">
+            <main class="main-section">
+              <LessonList
+                v-if="!showCart"
+                :lessons="filteredAndSortedLessons"
+                @add-to-cart="addToCart"
+                :search.sync="searchQuery"
+                :sort-attribute.sync="sortAttribute"
+                :sort-order.sync="sortOrder"
+              />
+
+              <CartPage
+                v-else
+                :cart="cart"
+                :cart-total="cartTotal"
+                @decrement="decrementCartItem"
+                @increment="incrementCartItem"
+                @remove="removeCartItem"
+                @confirm-checkout="confirmCheckout"
+                @back="toggleCart"
+                :customer-name.sync="customerName"
+                :customer-phone.sync="customerPhone"
+                :is-name-valid="isNameValid"
+                :is-phone-valid="isPhoneValid"
+                :is-valid="isCheckoutFormValid"
+                @validate="onValidateCheckout"
+              />
+            </main>
+          </div>
+        </div>
+      </div>
+      <FooterSection />
+    </div>
   </div>
 </template>
 
@@ -51,6 +85,7 @@ import LessonList from "./components/LessonList.vue";
 import CartPage from "./components/CartPage.vue";
 import FooterSection from "./components/FooterSection.vue";
 import LoginPopup from "./components/LoginPopup.vue";
+import RegisterPopup from "./components/RegisterPopup.vue";
 
 // import Imgs
 import bg1Image from "../src/assets/images/bg3.jpg";
@@ -67,10 +102,23 @@ import robTec3Image from "../src/assets/images/rob-tec3.jpg";
 
 export default {
   name: "App",
-  components: { Navbar, LessonList, CartPage, FooterSection, LoginPopup },
+  components: { 
+    Navbar, 
+    LessonList, 
+    CartPage, 
+    FooterSection, 
+    LoginPopup, 
+    RegisterPopup 
+  },
   data() {
     return {
-      showLogin: false,
+      // Authentication state
+      isAuthenticated: false,
+      currentUser: null,
+      showLogin: true, // Show login by default
+      showRegister: false,
+      
+      // App state
       searchQuery: "",
       sortAttribute: "",
       sortOrder: "asc",
@@ -79,6 +127,9 @@ export default {
 
       // background image 
       backgroundImage: bg1Image,
+
+      // Order confirmation
+      showOrderConfirmation: false,
 
       lessons: [],
 
@@ -92,10 +143,32 @@ export default {
   },
 
   async created() {
+    console.log('App created - checking auth state');
+    // Clear any existing auth state for testing
+    // localStorage.removeItem('currentUser');
+    
+    // Check if user is already logged in (e.g., from localStorage)
+    const storedUser = localStorage.getItem('currentUser');
+    console.log('Stored user:', storedUser);
+    
+    if (storedUser) {
+      try {
+        this.currentUser = JSON.parse(storedUser);
+        this.isAuthenticated = true;
+        this.showLogin = false;
+        console.log('User is authenticated:', this.currentUser);
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+        localStorage.removeItem('currentUser');
+      }
+    } else {
+      console.log('No stored user, showing login form');
+      this.isAuthenticated = false;
+      this.showLogin = true;
+    }
+    
     await this.fetchLessons();
   },
-
-
 
   computed: {
     cartItemCount() {
@@ -152,6 +225,46 @@ export default {
     }
   },
   methods: {
+    // Authentication methods
+    handleLogin(credentials) {
+      console.log('Handling login with:', credentials);
+      // In a real app, you would validate credentials against your backend
+      this.currentUser = { email: credentials.email };
+      this.isAuthenticated = true;
+      this.showLogin = false;
+      
+      // Store user in localStorage to persist login
+      localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+      console.log('User logged in and stored in localStorage');
+    },
+    
+    handleRegistration(userData) {
+      // In a real app, you would register the user with your backend
+      console.log('Register user:', userData);
+      
+      // Show success message
+      alert('Registration successful! Please log in to continue.');
+      
+      // Switch to login form
+      this.showRegister = false;
+      this.showLogin = true;
+    },
+    
+    handleLogout() {
+      this.isAuthenticated = false;
+      this.currentUser = null;
+      this.showLogin = true;
+      localStorage.removeItem('currentUser');
+    },
+    
+    closeAuth() {
+      this.showLogin = false;
+      this.showRegister = false;
+    },
+    
+    closeConfirmation() {
+      this.showOrderConfirmation = false;
+    },
 
     async fetchLessons() {
       try {
@@ -219,46 +332,85 @@ export default {
     },
     // checkout methods
     validateCheckout() {
-      const namePattern = /^[A-Za-z\s]+$/;
-      this.isNameValid = namePattern.test(this.customerName.trim());
-      const phonePattern = /^\d+$/;
-      this.isPhoneValid = phonePattern.test(this.customerPhone.trim());
-      this.isCheckoutFormValid = this.isNameValid && this.isPhoneValid && this.cart.length > 0;
+      // Only validate if we have the necessary data
+      if (this.customerName !== undefined && this.customerPhone !== undefined) {
+        const namePattern = /^[A-Za-z\s]+$/;
+        this.isNameValid = namePattern.test(this.customerName.trim());
+        const phonePattern = /^\d+$/;
+        this.isPhoneValid = phonePattern.test(this.customerPhone.trim());
+        this.isCheckoutFormValid = this.isNameValid && this.isPhoneValid && this.cart.length > 0;
+      } else {
+        // If we don't have the data yet, assume invalid
+        this.isCheckoutFormValid = false;
+      }
+      console.log('Validation in App.vue:', {
+        name: this.customerName,
+        nameValid: this.isNameValid,
+        phone: this.customerPhone,
+        phoneValid: this.isPhoneValid,
+        cartItems: this.cart.length,
+        isCheckoutFormValid: this.isCheckoutFormValid
+      });
     },
-
-    async confirmCheckout() {
+    
+    onValidateCheckout() {
+      // Re-validate with current form data
       this.validateCheckout();
-      if (!this.isCheckoutFormValid) return;
+    },
+    
+    async confirmCheckout(payload) {
+      console.log('confirmCheckout called in App.vue with payload:', payload);
+      
+      // Use the data from the payload instead of component's data properties
+      const { name, phone, items } = payload;
+      
+      // Update local state with the latest values
+      this.customerName = name;
+      this.customerPhone = phone;
+      
+      // Re-validate with the latest data
+      this.validateCheckout();
+      
+      if (!this.isCheckoutFormValid) {
+        console.log('Form is not valid, aborting checkout');
+        return;
+      }
 
       try {
-
         const orderData = {
-          name: this.customerName,
-          phone: this.customerPhone,
-          lessonIDs: this.cart.map((item) => item.id),
-          numberOfSpace: this.cart.reduce((sum, item) => sum + item.count, 0),
+          name: name,
+          phone: phone,
+          lessonIDs: items.map((item) => item.id),
+          numberOfSpace: items.reduce((sum, item) => sum + item.count, 0),
         };
-
+        
+        console.log('Creating order with data:', orderData);
         await createOrder(orderData);
+        console.log('Order created successfully');
 
-      const updates = this.cart.map((item) => {
-        const lesson = this.getLessonById(item.id);
-        const current = Number(lesson?.spaces ?? lesson?.space ?? 0) || 0;
-        const newSpaces = Math.max(0, current - item.count);
-        return updateLessonSpaces(item.id, newSpaces);
-      });
+        const updates = items.map((item) => {
+          const lesson = this.getLessonById(item.id);
+          const current = Number(lesson?.spaces ?? lesson?.space ?? 0) || 0;
+          const newSpaces = Math.max(0, current - item.count);
+          console.log(`Updating lesson ${item.id} spaces from ${current} to ${newSpaces}`);
+          return updateLessonSpaces(item.id, newSpaces);
+        });
 
-
+        console.log('Updating lesson spaces...');
         await Promise.all(updates);
+        console.log('Lesson spaces updated');
 
+        // Clear cart and form
         this.cart = [];
         this.customerName = "";
         this.customerPhone = "";
         this.showCart = false;
 
+        console.log('Refreshing lessons...');
         await this.fetchLessons();
 
-        alert("Order placed successfully!");
+        console.log('Showing order confirmation');
+        this.showOrderConfirmation = true;
       } catch (error) {
         console.error("Checkout failed:", error);
         alert("Failed to place order. Please try again.");
@@ -267,5 +419,100 @@ export default {
   },
 };
 </script>
+
+<style>
+/* Confirmation Popup */
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.confirmation-popup {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: popIn 0.3s ease-out;
+}
+
+.confirmation-icon {
+  font-size: 4rem;
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.confirmation-popup h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.confirmation-popup p {
+  color: #666;
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.confirmation-close-btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.confirmation-close-btn:hover {
+  background-color: #45a049;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Auth Container */
+.auth-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('@/assets/images/bg3.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1000;
+}
+
+/* Make sure the login popup is on top */
+.login-box {
+  position: relative;
+  z-index: 1001;
+}
+</style>
 
 <style src="../src/assets/style.css"></style>

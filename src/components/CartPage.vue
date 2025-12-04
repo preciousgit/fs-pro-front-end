@@ -161,12 +161,27 @@ export default {
     },
 
     handleConfirmCheckout() {
-      if (!this.isCheckoutFormValid) return;
-
-      this.$emit("confirm-checkout", {
-        name: this.localName,
-        phone: this.localPhone,
-        items: this.cart,
+      console.log('Checkout button clicked');
+      
+      // First, emit the latest form values to update parent component
+      this.$emit("update:customerName", this.localName);
+      this.$emit("update:customerPhone", this.localPhone);
+      this.$emit("validate");
+      
+      // Small delay to ensure parent has updated its state
+      this.$nextTick(() => {
+        // Now emit the checkout event with the latest data
+        console.log('Emitting confirm-checkout event with data:', {
+          name: this.localName,
+          phone: this.localPhone,
+          items: this.cart,
+        });
+        
+        this.$emit("confirm-checkout", {
+          name: this.localName,
+          phone: this.localPhone,
+          items: this.cart,
+        });
       });
     },
   },

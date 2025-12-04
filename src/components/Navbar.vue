@@ -23,6 +23,8 @@
 </template>
 
 <script>
+
+
 export default {
   name: "Navbar",
   props: { 
@@ -48,6 +50,7 @@ export default {
 </script>
 
 <style scoped>
+
 .user-email {
   margin-right: 15px;
   color: #333;
@@ -76,5 +79,3 @@ export default {
   color: #c82333;
 }
 </style>
-
-<style src="../assets/style.css"></style>

@@ -514,5 +514,3 @@ export default {
   z-index: 1001;
 }
 </style>
-
-<style src="../src/assets/style.css"></style>

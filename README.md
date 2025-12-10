@@ -28,6 +28,9 @@ The application allows users to:
 - **[Vue.js App (GitHub Repository)](https://github.com/preciousgit/fs-pro-front-end)** - Frontend source code
 - **[Vue.js App (GitHub Pages - Live App)](https://preciousgit.github.io/fs-pro-front-end/)** - Deployed frontend (live application)
 
+- LOG IN EMAIL: preciousonyechere3@gmail.com
+- PASSWORD: pre123cious
+
 ### Backend
 - **[Express.js App (GitHub Repository)](https://github.com/preciousgit/fs-pro-back-end)** - Backend source code
 - **[Express.js App (Render Deployment)](https://fs-pro-back-end.onrender.com)** - Deployed backend service
